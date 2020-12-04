@@ -45,6 +45,7 @@ signal Swap_enable : STD_LOGIC;
 signal SumMant : STD_LOGIC_VECTOR(24 downto 0);
 signal Entry1 : STD_LOGIC_VECTOR(24 downto 0);
 signal Entry2 : STD_LOGIC_VECTOR(24 downto 0);
+signal Carry : std_logic; 
 
 --rounding
 signal RotMant : STD_LOGIC_VECTOR(22 downto 0);
@@ -89,6 +90,9 @@ signal MantToShift : STD_LOGIC_VECTOR(23 downto 0);
 --verify numbers
 signal enableVerif : STD_LOGIC;
 signal ZVerif : STD_LOGIC_VECTOR(31 downto 0);
+
+  signal extManX : std_logic_vector(24 downto 0);
+   signal extManY : std_logic_vector(24 downto 0);
 
 begin
 
@@ -135,7 +139,8 @@ begin
                         Clk => Clk,
                         DifExp => diff,
                         ZComp => cntShift,
-                        SumMant => SumMant(24 downto 23),
+                        RezHiddenBit => SumMant(23),
+                        Carry => Carry,
                         Start => StartOp,
                         op => op,
                         ExpDec => Expdec,
@@ -183,8 +188,6 @@ begin
         );
     GreaterMant <= '1' & GreaterMantmux;
     
-    
-    
     ShiftMantissaRight : entity WORK.Shift_Left_Right_Register 
         generic map (nrBits => 24)
         port map (Clk => Clk,
@@ -195,14 +198,14 @@ begin
                   MantOut => ShiftMant
         );  
    
+ 
    
-   
-   
-    Entry1 <= ('0' & GreaterMant);
-   Entry2 <= ('0' & ShiftMant);
+   extManX <= '0' & GreaterMant;
+   extManY <= '0' & ShiftMant;
    UAL : entity WORK.ALU port map (
-                        MX => Entry1,
-                        MY => Entry2,
+                        MX => GreaterMant,
+                        MY => ShiftMant,
+                        Carry => Carry,
                         ALUCtrl => SelectionOp,
                         MS => SumMant
         );
@@ -236,7 +239,6 @@ begin
         );  
         
     Round : entity WORK.Rounding port map (
-    
                         Mant => MantToRound,
                         Exp => ExpInc1,
                         Clk => Clk,

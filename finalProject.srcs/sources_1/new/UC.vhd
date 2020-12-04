@@ -9,7 +9,8 @@ entity UC is
          Clk : in STD_LOGIC;
          DifExp : in STD_LOGIC_VECTOR(7 downto 0);
          ZComp : in STD_LOGIC_VECTOR(4 downto 0);
-         SumMant : in STD_LOGIC_VECTOR(24 downto 23);   
+         RezHiddenBit : in STD_LOGIC;   
+         Carry :  STD_LOGIC;
          Start : in STD_LOGIC;
          op : in STD_LOGIC;
          ExpDec : in STD_LOGIC_VECTOR(8 downto 0);
@@ -35,30 +36,27 @@ end UC;
 architecture Behavioral of UC is
 
     type State_Type is (idle,
-                   load,
-                   init,
-                   dif_exp,
-                   shift_mantissa_right ,
-                   add_mantissa,
-                   stop,
-                   shift_mantissa_leftR,
-                   sub_mantissa,
-                   test_norm,
-                   shift_mant_right2,
-                   rounding,
-                   shift_mantissa_left,
-                   report_res,
-                   verif_underflow,
-                   verif_overflow,
-                   Error
-                   );
+                        load,
+                        init,
+                        dif_exp,
+                        shift_mantissa_right ,
+                        stop,
+                        shift_mantissa_leftR,
+                        test_norm,
+                        shift_mant_right2,
+                        rounding,
+                        shift_mantissa_left,
+                        report_res,
+                        verif_underflow,
+                        verif_overflow,
+                        Error
+                        );
     signal st : State_Type := idle;
     signal SelOp : STD_LOGIC;
 
 begin
 
     SelectionOp <= SelOp;
-    
     process(Clk)
         variable cntShiftRight : STD_LOGIC_VECTOR(7 downto 0);
         variable cntShiftLeft : STD_LOGIC_VECTOR(4 downto 0);
@@ -66,94 +64,92 @@ begin
         if RISING_EDGE(Clk) then
                 case st is
                     when idle => 
-                        if Start = '0' then                                               -- start state
-                            st <= idle;
-                         else
-                            st <= load;
-                         end if;
+                        case Start is 
+                            when '0' =>
+                                 st <= idle;
+                            when '1' =>
+                                 st <= load;
+                            when others => 
+                                 st <= Error; 
+                        end case;
                          
                      when load => 
-                         st <= init;                    --load numbers to operate with
+                         st <= init;                   
                      
-                     when init => if (SX xnor SY) = '1' then     -- addition on same sign
-                                    SelOp <= '0';
-                                  else SelOp <= '1';
-                                  end if;
+                     when init => 
+                         if (SX xnor SY) = '1' then     
+                           SelOp <= '0';
+                         else 
+                           SelOp <= '1';
+                         end if;
                                   
                       st <= dif_exp;   
                       
                      when dif_exp => 
-                         if DifExp = x"00" then              -- difference exponents state
+                         if DifExp = x"00" then              
                             if SelOp = '0' then                                
-                                st <= add_mantissa;
+                                st <= test_norm;
                             else 
-                                st <= sub_mantissa;
+                                st <= test_norm;
                             end if;
-                         elsif DifExp <= x"18" then         -- diff < 24
+                         elsif DifExp <= x"18" then         
                             st<= shift_mantissa_right;
-                         else                              -- diff > 24                          
+                         else                                                      
                             st <= report_res;      
                          end if;
                          cntShiftRight := DifExp - 1;
                                      
-                    when shift_mantissa_right =>                                       -- shift mantissa right state
+                    when shift_mantissa_right =>                                       
                          if cntShiftRight > x"00" then
                             st <= shift_mantissa_right;
                             cntShiftRight := cntShiftRight - 1;
                          else
                             if SelOp = '0' then                             
-                                st <= add_mantissa;
+                                st <= test_norm;
                              else 
-                                st <= sub_mantissa;
+                                st <= test_norm;
                              end if;
-                         end if;
-                         
-                                                 
-                    when add_mantissa =>  
-                        st <= test_norm;                     -- addition of mantissas state
-                    
-                    when sub_mantissa => 
-                         st <= test_norm;                      -- substraction of mantissas state
+                         end if;        
                                          
                     when test_norm => 
-                          if SumMant(24 downto 23) = "00" then               -- test normalization state
-                             st <= shift_mantissa_left;
-                          elsif SumMant(24 downto 23) = "01" then                               
-                             st <= rounding;
-                          elsif SumMant(24 downto 23) = "10" or SumMant(24 downto 23) = "11" then        
-                             st <= shift_mant_right2;
-                          end if;
-                          cntShiftLeft := ZComp - 2;
+                       if Carry = '0' then 
+                            if RezHiddenBit = '0' then 
+                                st <= shift_mantissa_left;
+                            else st <= rounding;
+                            end if;
+                        else st <= shift_mant_right2;
+                        
+                        end if;
+                        cntShiftLeft := ZComp - 2;
                                       
-                    when shift_mantissa_left =>                                        -- shift mantissa left state
+                    when shift_mantissa_left =>                                       
                             if cntShiftLeft > "00000" then
                                 st <= shift_mantissa_left;
                                 cntShiftLeft := cntShiftLeft - 1;
                             else
                                 st <= rounding;
-                            end if;
-                                                
+                            end if;                   
                                       
                     when rounding =>
-                          st <= verif_underflow;                            -- rounding state
+                          st <= verif_underflow;                          
                                                      
                     when shift_mant_right2 =>
                           st <= verif_overflow;
                     
                     when verif_overflow =>     
-                         if ExpInc(8) = '1' then               -- verify overflow state
+                         if ExpInc(8) = '1' then               
                             OverF <= '1';
                          end if;
                          st <= report_res;                                       
                     
                     when verif_underflow =>
-                         if ExpDec = "111111111" then         -- verify underflow state
+                         if ExpDec = "111111111" then         
                             UnderF <= '1';
                          end if;
                          st <= report_res;                                      
    
                     when report_res =>
-                          st <= stop;              -- report result state
+                          st <= stop;             
                     
                     when stop =>
                           st <= idle;
@@ -168,8 +164,10 @@ begin
     LD <= '1' when st = load else '0';
     SR <= '1' when st = shift_mantissa_right or st = shift_mant_right2 else '0';
     SL <= '1' when st = shift_mantissa_left else '0';
+    
     EnableDec <= '1' when st = shift_mantissa_left else '0';
     EnableInc <= '1' when st = shift_mant_right2 else '0';
+    
     Ldinc <= '1' when st = init else '0';
     LDRez <= '1' when st = report_res else '0';
     LDMant <= '1' when st = init else '0';
