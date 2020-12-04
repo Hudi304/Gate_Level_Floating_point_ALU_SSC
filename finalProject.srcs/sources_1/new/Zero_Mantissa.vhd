@@ -1,40 +1,6 @@
-----------------------------------------------------------------------------------
--- Company: 
--- Engineer: 
--- 
--- Create Date: 12/01/2019 09:59:28 PM
--- Design Name: 
--- Module Name: Zero_Mantissa - Behavioral
--- Project Name: 
--- Target Devices: 
--- Tool Versions: 
--- Description: 
--- 
--- Dependencies: 
--- 
--- Revision:
--- Revision 0.01 - File Created
--- Additional Comments:
--- 
-----------------------------------------------------------------------------------
-
-
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.STD_LOGIC_UNSIGNED.ALL;
-
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
---use IEEE.NUMERIC_STD.ALL;
-
--- Uncomment the following library declaration if instantiating
--- any Xilinx leaf cells in this code.
---library UNISIM;
---use UNISIM.VComponents.all;
-
---------------------------------------------------------------------------------------
---Entity declaration
---------------------------------------------------------------------------------------
 
 entity Zero_Mantissa is
   Port ( Mant : in STD_LOGIC_VECTOR(24 downto 0);
@@ -42,17 +8,15 @@ entity Zero_Mantissa is
   );
 end Zero_Mantissa;
 
---------------------------------------------------------------------------------------
---Architecture description
---------------------------------------------------------------------------------------
+--Returneaza numarul de zerouri de la inceputul semnalului
+-- de la iesirea ALU mic (care aduna mantisele) printr-un semanl 
+-- de 5 biti (pot fi maxim 24 de zerouri -> 25 de cazuri)
+
 
 architecture Behavioral of Zero_Mantissa is
 
--- Signal declaration
---------------------------------------------------------------------------------------
-
-signal ZeroVector : STD_LOGIC_VECTOR(24 downto 0);
-signal aux : STD_LOGIC_VECTOR(7 downto 0);
+    signal ZeroVector : STD_LOGIC_VECTOR(24 downto 0);
+    signal aux : STD_LOGIC_VECTOR(7 downto 0);
 
 begin
     ZeroVector <= "0000000000000000000000000";
