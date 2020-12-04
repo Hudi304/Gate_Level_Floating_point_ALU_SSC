@@ -22,79 +22,81 @@ architecture Behavioral of Main is
 signal NumberA : STD_LOGIC_VECTOR(31 downto 0);
 signal NumberB : STD_LOGIC_VECTOR(31 downto 0);
 
-        --UC
-        signal Load : STD_LOGIC;
-        signal LoadRez : STD_LOGIC;
-        signal ShiftRight : STD_LOGIC := '0';                          
-        signal SL : STD_LOGIC := '0';                
-        signal SelectionOp : STD_LOGIC := '0';
-        signal OverF : STD_LOGIC := '0';
-        signal UnderF : STD_LOGIC := '0';
-        signal EnableDec : STD_LOGIC := '0';
-        signal EnableInc : STD_LOGIC := '0';
-        signal LDMant : STD_LOGIC := '0';
-        signal LDMantSum : STD_LOGIC := '0';
-        signal LDinc : STD_LOGIC := '0';
-        signal StopSig : STD_LOGIC := '0';
-        
-        --difExp
-        signal diff : STD_LOGIC_VECTOR(7 downto 0) := "00000000";
-        signal Swap_enable : STD_LOGIC;
-        
-        --ALU
-        signal SumMant : STD_LOGIC_VECTOR(24 downto 0);
-        signal Entry1 : STD_LOGIC_VECTOR(24 downto 0);
-        signal Entry2 : STD_LOGIC_VECTOR(24 downto 0);
-        
-        --rounding
-        signal RotMant : STD_LOGIC_VECTOR(22 downto 0);
-        signal Rotexp : STD_LOGIC_VECTOR(7 downto 0);
-        signal SelExp : STD_LOGIC_VECTOR(7 downto 0);
-        
-        --Mux 
-        signal Mmin : STD_LOGIC := '0';                    
-        signal ExpGrt : STD_LOGIC_VECTOR(7 downto 0);
-        signal LowerMant : STD_LOGIC_VECTOR(23 downto 0);
-        signal GreaterMant : STD_LOGIC_VECTOR(23 downto 0);
-        signal LowerMantMux : STD_LOGIC_VECTOR(22 downto 0);
-        signal GreaterMantMux : STD_LOGIC_VECTOR(22 downto 0);
-        
-        --ShiftRegisterRight
-        signal ShiftMant : STD_LOGIC_VECTOR(23 downto 0);
-        
-        --Decrement
-        signal ExpDec : STD_LOGIC_VECTOR(8 downto 0);
-        
-        --Increment
-        signal ExpInc : STD_LOGIC_VECTOR(8 downto 0);
-        signal ExpInc1 : STD_LOGIC_VECTOR(7 downto 0);
-        
-        --Mask
-        signal cntShift : STD_LOGIC_VECTOR(4 downto 0) := "00000";
-        
-        --ShiftRegisterLeft
-        signal MantToRound : STD_LOGIC_VECTOR(24 downto 0);
-        
-        --LoadReg
-        signal FinalRez : STD_LOGIC_VECTOR(31 downto 0);
-        
-        signal RezConcat : STD_LOGIC_VECTOR(31 downto 0);
-        
-        --sign decide
-        signal SRez : STD_LOGIC;
-        signal SwitchNr : STD_LOGIC;
-        
-        signal MantToShift : STD_LOGIC_VECTOR(23 downto 0);
-        
-        --verify numbers
-        signal enableVerif : STD_LOGIC;
-        signal ZVerif : STD_LOGIC_VECTOR(31 downto 0);
+--UC
+signal Load : STD_LOGIC;
+signal LoadRez : STD_LOGIC;
+signal ShiftRight : STD_LOGIC := '0';                          
+signal SL : STD_LOGIC := '0';                
+signal SelectionOp : STD_LOGIC := '0';
+signal OverF : STD_LOGIC := '0';
+signal UnderF : STD_LOGIC := '0';
+signal EnableDec : STD_LOGIC := '0';
+signal EnableInc : STD_LOGIC := '0';
+signal LDMant : STD_LOGIC := '0';
+signal LDMantSum : STD_LOGIC := '0';
+signal LDinc : STD_LOGIC := '0';
+signal StopSig : STD_LOGIC := '0';
+
+--difExp
+signal diff : STD_LOGIC_VECTOR(7 downto 0) := "00000000";
+signal Swap_enable : STD_LOGIC;
+
+--ALU
+signal SumMant : STD_LOGIC_VECTOR(24 downto 0);
+signal Entry1 : STD_LOGIC_VECTOR(24 downto 0);
+signal Entry2 : STD_LOGIC_VECTOR(24 downto 0);
+
+--rounding
+signal RotMant : STD_LOGIC_VECTOR(22 downto 0);
+signal Rotexp : STD_LOGIC_VECTOR(7 downto 0);
+signal SelExp : STD_LOGIC_VECTOR(7 downto 0);
+
+--Mux 
+signal Mmin : STD_LOGIC := '0';                    
+signal ExpGrt : STD_LOGIC_VECTOR(7 downto 0);
+signal LowerMant : STD_LOGIC_VECTOR(23 downto 0);
+signal GreaterMant : STD_LOGIC_VECTOR(23 downto 0);
+signal LowerMantMux : STD_LOGIC_VECTOR(22 downto 0);
+signal GreaterMantMux : STD_LOGIC_VECTOR(22 downto 0);
+
+--ShiftRegisterRight
+signal ShiftMant : STD_LOGIC_VECTOR(23 downto 0);
+
+--Decrement
+signal ExpDec : STD_LOGIC_VECTOR(8 downto 0);
+
+--Increment
+signal ExpInc : STD_LOGIC_VECTOR(8 downto 0);
+signal ExpInc1 : STD_LOGIC_VECTOR(7 downto 0);
+
+--Mask
+signal cntShift : STD_LOGIC_VECTOR(4 downto 0) := "00000";
+
+--ShiftRegisterLeft
+signal MantToRound : STD_LOGIC_VECTOR(24 downto 0);
+
+--LoadReg
+signal FinalRez : STD_LOGIC_VECTOR(31 downto 0);
+
+signal RezConcat : STD_LOGIC_VECTOR(31 downto 0);
+
+--sign decide
+signal SRez : STD_LOGIC;
+signal SwitchNr : STD_LOGIC;
+
+signal MantToShift : STD_LOGIC_VECTOR(23 downto 0);
+
+--verify numbers
+signal enableVerif : STD_LOGIC;
+signal ZVerif : STD_LOGIC_VECTOR(31 downto 0);
 
 begin
 
-    --NumberB(31) <= Y(31) xor op;
+    NumberB(31) <= Y(31) xor op;
     
-    FirstNumber : entity WORK.Load_Register port map (
+    FirstNumber : entity WORK.Load_Register 
+    generic map (nrBits=>32) 
+    port map (
                         D => X,
                         Load => Load,
                         Clr => '0',
@@ -102,12 +104,14 @@ begin
                         Q => NumberA
     );
     
-    SecondNumber : entity WORK.Load_Register port map (
-                        D => Y,
+    SecondNumber : entity WORK.Load_Register
+    generic map (nrBits=>31) 
+    port map (
+                        D => Y(30 downto 0),
                         Load => Load,
                         Clr => '0',
                         Clk => Clk,
-                        Q => NumberB
+                        Q => NumberB(30 downto 0)
     );
     
     NumbersNature : entity WORK.NumbersNature port map(
@@ -194,7 +198,7 @@ begin
    
    
    
-   Entry1 <= ('0' & GreaterMant);
+    Entry1 <= ('0' & GreaterMant);
    Entry2 <= ('0' & ShiftMant);
    UAL : entity WORK.ALU port map (
                         MX => Entry1,
@@ -251,7 +255,9 @@ begin
     
     RezConcat <= SRez & RotExp & RotMant;
     
-    FinalResult : entity WORK.Load_Register port map (
+    FinalResult : entity WORK.Load_Register 
+    generic map (nrBits=>32) 
+    port map (
     
                         D => RezConcat,
                         Load => LoadRez,

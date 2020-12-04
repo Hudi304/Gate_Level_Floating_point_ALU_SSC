@@ -60,6 +60,10 @@ DUT : Main port map (
 
 
 process
+
+variable expected_result : STD_LOGIC_VECTOR (31 downto 0);
+variable counter_errors : INTEGER := 0; 
+
 begin 
      StartOp <= '1';
      op <= '0';
@@ -74,11 +78,17 @@ begin
 
      StartOp <= '1';
      op <= '0';
-     X <= "11000010111100000000000000000000";   -- 120
+     X <= "11000010111100000000000000000000";   -- -120
      Y <= "11000001101101001100110011001101";   -- -22.6
      wait for 10ns;
      StartOp <= '0';
      wait for 300ns;
+     expected_result := "11000011000011101001100110011001";
+     if (expected_result /= Z) then 
+         report "Wrong for -120+(-22.6)";
+         counter_errors := counter_errors + 1;
+     end if;
+     
      StartOp <= '1';
      wait for 10ns;
      StartOp <= '0';
@@ -88,15 +98,27 @@ begin
      wait for 10ns;
      StartOp <= '0';
      wait for 300ns;
+     expected_result := "01000010110000101100110011001101";
+     if (expected_result /= Z) then 
+         report "Wrong for 120+(-22.6)";
+         counter_errors := counter_errors + 1;
+     end if;
+     
      StartOp <= '1';
      wait for 10ns;
      StartOp <= '0';
      op <= '1';
-      X <= "11000010111100000000000000000000";   -- 120
+      X <= "11000010111100000000000000000000";  -- -120
      Y <= "11000001101101001100110011001101";   -- -22.6
      wait for 10ns;
      StartOp <= '0';
      wait for 300ns;
+     expected_result := "11000010110000101100110011001101";
+     if (expected_result /= Z) then 
+         report "Wrong for -120-(-22.6)";
+         counter_errors := counter_errors + 1;
+     end if;
+     
      StartOp <= '1';
      wait for 10ns;
      StartOp <= '0';
@@ -104,6 +126,12 @@ begin
      X <= "01000010111100000000000000000000";   -- 120
      Y <= "11000001101101001100110011001101";   -- -22.6
      wait for 300ns;
+     expected_result := "01000011000011101001100110011001";
+     if (expected_result /= Z) then 
+         report "Wrong for 120-(-22.6)";
+         counter_errors := counter_errors + 1;
+     end if;
+     
      ---------------------------------------------
      op <= '0';
      X <= "01000010111100000000000000000000";   -- 120
@@ -111,6 +139,12 @@ begin
      wait for 10ns;
      StartOp <= '0';
      wait for 300ns;
+     expected_result := "01000011000011101001100110011001";
+     if (expected_result /= Z) then 
+         report "Wrong for 120+22.6";
+         counter_errors := counter_errors + 1;
+     end if;
+     
      StartOp <= '1';
      wait for 10ns;
      StartOp <= '0';
@@ -120,6 +154,12 @@ begin
      wait for 10ns;
      StartOp <= '0';
      wait for 300ns;
+     expected_result := "11000010110000101100110011001101";
+     if (expected_result /= Z) then 
+         report "Wrong for -120+22.6";
+         counter_errors := counter_errors + 1;
+     end if;
+     
      StartOp <= '1';
      wait for 10ns;
      StartOp <= '0';
@@ -129,6 +169,12 @@ begin
      wait for 10ns;
      StartOp <= '0';
      wait for 300ns;
+     expected_result := "01000010110000101100110011001101";
+     if (expected_result /= Z) then 
+         report "Wrong for 120-22.6";
+         counter_errors := counter_errors + 1;
+     end if;
+     
      StartOp <= '1';
      wait for 10ns;
      StartOp <= '0';
@@ -136,20 +182,22 @@ begin
      X <= "11000010111100000000000000000000";   -- 120
      Y <= "01000001101101001100110011001101";   -- -22.6
      wait for 300ns;
+     expected_result := "11000011000011101001100110011001";
+     if (expected_result /= Z) then 
+         report "Wrong for -120-22.6";
+         counter_errors := counter_errors + 1;
+     end if;
      
      ---------------------------------------------------------------------------
      
      
-       StartOp <= '1';
+     StartOp <= '1';
      op <= '0';
      X <= NaN;   -- 120
      Y <= "11000000101000000000000000000000";   
      wait for 10ns;
      StartOp <= '0';
      wait for 300ns;
-     StartOp <= '1';
-     wait for 10ns;
-
 
      StartOp <= '1';
      op <= '0';
@@ -158,6 +206,12 @@ begin
      wait for 10ns;
      StartOp <= '0';
      wait for 300ns;
+     expected_result := "11000010111110100000000000000000";
+     if (expected_result /= Z) then 
+         report "Wrong for -120+(-5)";
+         counter_errors := counter_errors + 1;
+     end if;
+     
      StartOp <= '1';
      wait for 10ns;
      StartOp <= '0';
@@ -167,6 +221,12 @@ begin
      wait for 10ns;
      StartOp <= '0';
      wait for 300ns;
+     expected_result := "01000010111001100000000000000000";
+     if (expected_result /= Z) then 
+         report "Wrong for 120-5";
+         counter_errors := counter_errors + 1;
+     end if;
+     
      StartOp <= '1';
      wait for 10ns;
      StartOp <= '0';
@@ -176,6 +236,12 @@ begin
      wait for 10ns;
      StartOp <= '0';
      wait for 300ns;
+     expected_result := "11000010111001100000000000000000";
+     if (expected_result /= Z) then 
+         report "Wrong for -120-(-5)";
+         counter_errors := counter_errors + 1;
+     end if;
+     
      StartOp <= '1';
      wait for 10ns;
      StartOp <= '0';
@@ -183,6 +249,12 @@ begin
      X <= "01000010111100000000000000000000";   
      Y <= "11000000101000000000000000000000";   
      wait for 300ns;
+     expected_result := "01000010111110100000000000000000";
+     if (expected_result /= Z) then 
+         report "Wrong for 120-(-5)";
+         counter_errors := counter_errors + 1;
+     end if;
+     
      ---------------------------------------------
      op <= '0';
      X <= "01000010111100000000000000000000";   
@@ -190,6 +262,12 @@ begin
      wait for 10ns;
      StartOp <= '0';
      wait for 300ns;
+     expected_result := "01000010111110100000000000000000";
+     if (expected_result /= Z) then 
+         report "Wrong for 120+5";
+         counter_errors := counter_errors + 1;
+     end if;
+     
      StartOp <= '1';
      wait for 10ns;
      StartOp <= '0';
@@ -199,6 +277,12 @@ begin
      wait for 10ns;
      StartOp <= '0';
      wait for 300ns;
+     expected_result := "11000010111001100000000000000000";
+     if (expected_result /= Z) then 
+         report "Wrong for -120+5";
+         counter_errors := counter_errors + 1;
+     end if;
+     
      StartOp <= '1';
      wait for 10ns;
      StartOp <= '0';
@@ -208,6 +292,12 @@ begin
      wait for 10ns;
      StartOp <= '0';
      wait for 300ns;
+     expected_result := "01000010111001100000000000000000";
+     if (expected_result /= Z) then 
+         report "Wrong for 120-5";
+         counter_errors := counter_errors + 1;
+     end if;
+     
      StartOp <= '1';
      wait for 10ns;
      StartOp <= '0';
@@ -217,15 +307,22 @@ begin
       wait for 10ns;
      StartOp <= '0';
      wait for 300ns;
+     expected_result := "11000010111110100000000000000000";
+     if (expected_result /= Z) then 
+         report "Wrong for -120-5";
+         counter_errors := counter_errors + 1;
+     end if;
+     
      StartOp <= '1';
      wait for 10ns;
      StartOp <= '0';
      op <= '0';
-      X <= "01111111011111111111111111111111";   
+     X <= "01111111011111111111111111111111";   
      Y <=  "01111111011111111111111111111111";  
      wait for 10ns;
      StartOp <= '0';
      wait for 300ns;
+     
      StartOp <= '1';
      wait for 10ns;
      StartOp <= '0';
@@ -233,9 +330,20 @@ begin
      X <= "11000010111100000000000000000000";  
      Y <= "01000000101000000000000000000000";  
      wait for 300ns;
+     expected_result := "11000010111001100000000000000000";
+     if (expected_result /= Z) then 
+         report "Wrong for -120+5";
+         counter_errors := counter_errors + 1;
+     end if;
      
-  
-
+     if counter_errors /= 0 then
+            report "Found " & INTEGER'image (counter_errors) & " errors";
+        else 
+            report "Simulation Ended Successfully!";
+        end if;
+     
+    wait for 100000ns; 
+    
 end process;
 
 

@@ -75,30 +75,11 @@ begin
                      when load => 
                          st <= init;                    --load numbers to operate with
                      
-                     when init =>                                 -- initialization state
-                        case op is                                                       
-                            when '0' => 
-                                if SX = '0' and SY = '0' then          -- addition operation
+                     when init => if (SX xnor SY) = '1' then     -- addition on same sign
                                     SelOp <= '0';
-                                 elsif SX = '0' and SY ='1' then
-                                    SelOp <= '1';
-                                 elsif SX = '1' and SY = '0' then
-                                    SelOp <= '1';
-                                 elsif SX = '1' and SY = '1' then
-                                    SelOp <= '0';
-                                 end if;
-                                         
-                            when others =>  
-                                if SX = '0' and SY = '0' then         -- substraction operation
-                                    SelOp <= '1';
-                                elsif SX = '0' and SY = '1' then
-                                    SelOp <= '0';
-                                elsif SX = '1' and SY = '0' then
-                                    SelOp <= '0';
-                                elsif SX = '1' and SY = '1' then
-                                    SelOp <= '1';
-                                end if;
-                      end case;
+                                  else SelOp <= '1';
+                                  end if;
+                                  
                       st <= dif_exp;   
                       
                      when dif_exp => 
